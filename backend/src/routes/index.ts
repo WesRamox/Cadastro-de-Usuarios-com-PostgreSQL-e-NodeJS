@@ -6,7 +6,4 @@ const router = Router();
 // Exemplo: api/users
 router.use("/users", usersRoutes);
 
-// router.use("/", (req: Request, res: Response) => {
-// })
-
 export default router;
