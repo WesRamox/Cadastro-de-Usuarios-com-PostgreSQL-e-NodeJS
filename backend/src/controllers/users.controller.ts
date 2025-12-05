@@ -3,7 +3,9 @@ import { db } from "../db";
 import { capitalize } from "../utils/strings";
 
 export async function getAllUsers(req: Request, res: Response) {
-  const { rows } = await db.query(`SELECT * FROM users;`);
+  const { rows } = await db.query(`SELECT name, phone, signup_date FROM users;`);
+
+
   return res.json(rows);
 }
 
@@ -23,7 +25,7 @@ export async function getUserById(req: Request, res: Response) {
   const { id } = req.params
 
   try {
-    const query = "SELECT * FROM users WHERE id = $1;"
+    const query = "SELECT name, phone, email FROM users WHERE id = $1;"
     const result = await db.query(query, [id])
 
     if (result.rows.length <= 0) {
