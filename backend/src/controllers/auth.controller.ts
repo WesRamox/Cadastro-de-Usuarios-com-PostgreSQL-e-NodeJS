@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
-import { db } from "../db";
+import { db } from "../config/db";
 import { capitalize } from "../utils/strings";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+
+import { secretKey } from "../config/env";
 
 export async function signUpAuth(req: Request, res: Response) {
   const { name, phone, email, password } = req.body
@@ -26,5 +29,34 @@ export async function signUpAuth(req: Request, res: Response) {
 }
 
 export async function signInAuth(req: Request, res: Response) {
-  return res.json({ message: "Ok sign in " })
+  const { email, password } = req.body
+
+  try {
+    const query = "SELECT id, email, password_hash FROM users where email = $1"
+    const user = await db.query(query, [email])
+
+    if (user.rows.length === 0) {
+      return res.json({ error: "Usuário não encontrado, por favor insira um usuário válido!" })
+    }
+
+    const passwordHashed = user.rows[0].password_hash
+    const match = await bcrypt.compare(password, passwordHashed)
+
+    if (!match) {
+      return res.json({ error: "Senha incorreta, por favor verifique novamente." })
+    }
+
+    if(!secretKey) {
+      return res.json({ error: "Erro interno, por favor entre em contato com o SUPORTE"})
+    }
+
+    const userId = user.rows[0].id
+    const payload = { userId }
+
+    const token = jwt.sign(payload, secretKey, { expiresIn: '1h' })
+    return res.json({ token })
+
+  } catch (error) {
+    return res.json({ error })
+  }
 }

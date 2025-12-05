@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { db } from "../db";
+import { db } from "../config/db";
 import { capitalize } from "../utils/strings";
 
 export async function getAllUsers(req: Request, res: Response) {
