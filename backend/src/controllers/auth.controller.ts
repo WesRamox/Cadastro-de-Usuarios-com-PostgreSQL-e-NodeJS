@@ -32,7 +32,7 @@ export async function signInAuth(req: Request, res: Response) {
   const { email, password } = req.body
 
   try {
-    const query = "SELECT id, email, password_hash FROM users where email = $1"
+    const query = "SELECT id, name, email, password_hash FROM users where email = $1"
     const user = await db.query(query, [email])
 
     if (user.rows.length === 0) {
@@ -50,11 +50,20 @@ export async function signInAuth(req: Request, res: Response) {
       return res.json({ error: "Erro interno, por favor entre em contato com o SUPORTE"})
     }
 
-    const userId = user.rows[0].id
+    const { id: userId, name: userName, email: userEmail, phone: userPhone } = user.rows[0];
+
     const payload = { userId }
 
     const token = jwt.sign(payload, secretKey, { expiresIn: '1h' })
-    return res.json({ token })
+    return res.json({ 
+      token, 
+      user: {
+        id: userId,
+        name: userName,
+        email: userEmail,
+        phone: userPhone
+       }
+    })
 
   } catch (error) {
     return res.json({ error })
